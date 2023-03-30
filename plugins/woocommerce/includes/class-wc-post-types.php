@@ -460,6 +460,30 @@ class WC_Post_Types {
 								'id'    => 'pricing',
 								'title' => __( 'Pricing', 'woocommerce' ),
 							),
+							array(
+								array(
+									'woocommerce/product-radio',
+									array(
+										'title'       => __( 'Tax class', 'woocommerce' ),
+										'description' => __( 'Apply a tax rate if this product qualifies for tax reduction or exemption. Learn more', 'woocommerce' ),
+										'property'    => 'tax_class',
+										'options'     => array(
+											array(
+												'label' => __( 'Standard', 'woocommerce' ),
+												'value' => '',
+											),
+											array(
+												'label' => __( 'Reduced rate', 'woocommerce' ),
+												'value' => 'reduced-rate',
+											),
+											array(
+												'label' => __( 'Zero rate', 'woocommerce' ),
+												'value' => 'zero-rate',
+											),
+										)
+									),
+								),
+							)
 						),
 						array(
 							'woocommerce/product-tab',
