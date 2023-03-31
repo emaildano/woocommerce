@@ -472,15 +472,15 @@ class WC_Post_Types {
 										array(
 											'woocommerce/product-radio',
 											array(
-												'title'       => __( 'Tax class', 'woocommerce' ),
+												'title'    => __( 'Tax class', 'woocommerce' ),
 												'description' => sprintf(
 													/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
 													__( 'Apply a tax rate if this product qualifies for tax reduction or exemption. %1$sLearn more%2$s.', 'woocommerce' ),
 													'<a href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class" target="_blank" rel="noreferrer">',
 													'</a>'
 												),
-												'property'    => 'tax_class',
-												'options'     => array(
+												'property' => 'tax_class',
+												'options'  => array(
 													array(
 														'label' => __( 'Standard', 'woocommerce' ),
 														'value' => '',
@@ -493,12 +493,12 @@ class WC_Post_Types {
 														'label' => __( 'Zero rate', 'woocommerce' ),
 														'value' => 'zero-rate',
 													),
-												)
+												),
 											),
 										),
 									),
 								),
-							)
+							),
 						),
 						array(
 							'woocommerce/product-tab',
