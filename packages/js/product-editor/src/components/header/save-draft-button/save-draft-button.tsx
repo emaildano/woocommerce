@@ -7,18 +7,20 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { check } from '@wordpress/icons';
 import { createElement, Fragment } from '@wordpress/element';
+import { MouseEvent, ReactNode } from 'react';
 
-export function useSaveDraft( {
+export function SaveDraftButton( {
 	productId,
 	disabled,
+	onClick,
 	onSaveSuccess,
 	onSaveError,
 	...props
-}: Omit< Button.ButtonProps, 'variant' | 'onClick' > & {
+}: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' > & {
 	productId: number;
 	onSaveSuccess?( product: Product ): void;
 	onSaveError?( error: Error ): void;
-} ): Button.ButtonProps {
+} ) {
 	const { productStatus, hasEdits } = useSelect(
 		( select ) => {
 			const { getEditedEntityRecord, hasEditsForEntityRecord } =
@@ -44,7 +46,11 @@ export function useSaveDraft( {
 
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
-	async function handleClick() {
+	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
+		if ( onClick ) {
+			onClick( event );
+		}
+
 		try {
 			await editEntityRecord( 'postType', 'product', productId, {
 				status: 'draft',
@@ -55,17 +61,17 @@ export function useSaveDraft( {
 				productId
 			);
 
-			if ( typeof onSaveSuccess === 'function' ) {
+			if ( onSaveSuccess ) {
 				onSaveSuccess( publishedProduct );
 			}
 		} catch ( error ) {
-			if ( typeof onSaveError === 'function' ) {
+			if ( onSaveError ) {
 				onSaveError( error as Error );
 			}
 		}
 	}
 
-	let children;
+	let children: ReactNode;
 	if ( productStatus === 'publish' ) {
 		children = __( 'Switch to draft', 'woocommerce' );
 	} else if ( hasEdits ) {
@@ -79,12 +85,16 @@ export function useSaveDraft( {
 		);
 	}
 
-	return {
-		children,
-		...props,
-		'aria-disabled':
-			disabled || ( productStatus !== 'publish' && ! hasEdits ),
-		variant: 'tertiary',
-		onClick: handleClick,
-	};
+	return (
+		<Button
+			{ ...props }
+			aria-disabled={
+				disabled || ( productStatus !== 'publish' && ! hasEdits )
+			}
+			variant="tertiary"
+			onClick={ handleClick }
+		>
+			{ children }
+		</Button>
+	);
 }
