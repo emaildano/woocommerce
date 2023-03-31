@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Product, ProductStatus } from '@woocommerce/data';
-import { Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -15,9 +14,9 @@ import { MouseEvent } from 'react';
  */
 import { getHeaderTitle } from '../../utils';
 import { MoreMenu } from './more-menu';
-import { usePublish } from './hooks/use-publish';
 import { PreviewButton } from './preview-button';
 import { SaveDraftButton } from './save-draft-button';
+import { PublishButton } from './publish-button';
 
 export type HeaderProps = {
 	productId: number;
@@ -67,44 +66,6 @@ export function Header( {
 		}
 	}
 
-	const publishButtonProps = usePublish( {
-		productId,
-		disabled: isDisabled,
-		isBusy: isSaving,
-		onPublishSuccess( savedProduct: Product ) {
-			const noticeContent = isCreating
-				? __( 'Product successfully created.', 'woocommerce' )
-				: __( 'Product published.', 'woocommerce' );
-			const noticeOptions = {
-				icon: '🎉',
-				actions: [
-					{
-						label: __( 'View in store', 'woocommerce' ),
-						// Leave the url to support a11y.
-						url: savedProduct.permalink,
-						onClick( event: MouseEvent< HTMLAnchorElement > ) {
-							event.preventDefault();
-							// Notice actions do not support target anchor prop,
-							// so this forces the page to be opened in a new tab.
-							window.open( savedProduct.permalink, '_blank' );
-						},
-					},
-				],
-			};
-
-			createNotice( 'success', noticeContent, noticeOptions );
-
-			maybeRedirectToEditPage( savedProduct.id );
-		},
-		onPublishError() {
-			const noticeContent = isCreating
-				? __( 'Failed to create product.', 'woocommerce' )
-				: __( 'Failed to publish product.', 'woocommerce' );
-
-			createNotice( 'error', noticeContent );
-		},
-	} );
-
 	return (
 		<div
 			className="woocommerce-product-header"
@@ -149,11 +110,51 @@ export function Header( {
 					} }
 				/>
 
-				<Button { ...publishButtonProps }>
-					{ isCreating
-						? __( 'Add', 'woocommerce' )
-						: __( 'Save', 'woocommerce' ) }
-				</Button>
+				<PublishButton
+					productId={ productId }
+					disabled={ isDisabled }
+					isBusy={ isSaving }
+					onPublishSuccess={ ( savedProduct: Product ) => {
+						const noticeContent = isCreating
+							? __(
+									'Product successfully created.',
+									'woocommerce'
+							  )
+							: __( 'Product published.', 'woocommerce' );
+						const noticeOptions = {
+							icon: '🎉',
+							actions: [
+								{
+									label: __( 'View in store', 'woocommerce' ),
+									// Leave the url to support a11y.
+									url: savedProduct.permalink,
+									onClick(
+										event: MouseEvent< HTMLAnchorElement >
+									) {
+										event.preventDefault();
+										// Notice actions do not support target anchor prop,
+										// so this forces the page to be opened in a new tab.
+										window.open(
+											savedProduct.permalink,
+											'_blank'
+										);
+									},
+								},
+							],
+						};
+
+						createNotice( 'success', noticeContent, noticeOptions );
+
+						maybeRedirectToEditPage( savedProduct.id );
+					} }
+					onPublishError={ () => {
+						const noticeContent = isCreating
+							? __( 'Failed to create product.', 'woocommerce' )
+							: __( 'Failed to publish product.', 'woocommerce' );
+
+						createNotice( 'error', noticeContent );
+					} }
+				/>
 
 				<WooHeaderItem.Slot name="product" />
 				<MoreMenu />

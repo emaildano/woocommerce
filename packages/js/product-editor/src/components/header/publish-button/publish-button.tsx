@@ -4,18 +4,22 @@
 import { Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { createElement } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { MouseEvent } from 'react';
 
-export function usePublish( {
+export function PublishButton( {
 	productId,
 	disabled,
+	onClick,
 	onPublishSuccess,
 	onPublishError,
 	...props
-}: Omit< Button.ButtonProps, 'variant' | 'onClick' > & {
+}: Omit< Button.ButtonProps, 'aria-disabled' | 'variant' | 'children' > & {
 	productId: number;
 	onPublishSuccess?( product: Product ): void;
 	onPublishError?( error: Error ): void;
-} ): Button.ButtonProps {
+} ) {
 	const { productStatus, hasEdits } = useSelect(
 		( select ) => {
 			const { getEditedEntityRecord, hasEditsForEntityRecord } =
@@ -39,9 +43,15 @@ export function usePublish( {
 		[ productId ]
 	);
 
+	const isCreating = ( productStatus as string ) === 'auto-draft';
+
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
-	async function handleClick() {
+	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
+		if ( onClick ) {
+			onClick( event );
+		}
+
 		try {
 			// The publish button click not only change the status of the product
 			// but also save all the pending changes. So even if the status is
@@ -58,21 +68,28 @@ export function usePublish( {
 				productId
 			);
 
-			if ( typeof onPublishSuccess === 'function' ) {
+			if ( onPublishSuccess ) {
 				onPublishSuccess( publishedProduct );
 			}
 		} catch ( error ) {
-			if ( typeof onPublishError === 'function' ) {
+			if ( onPublishError ) {
 				onPublishError( error as Error );
 			}
 		}
 	}
 
-	return {
-		...props,
-		'aria-disabled':
-			disabled || ( productStatus === 'publish' && ! hasEdits ),
-		variant: 'primary',
-		onClick: handleClick,
-	};
+	return (
+		<Button
+			{ ...props }
+			aria-disabled={
+				disabled || ( productStatus === 'publish' && ! hasEdits )
+			}
+			variant="primary"
+			onClick={ handleClick }
+		>
+			{ isCreating
+				? __( 'Add', 'woocommerce' )
+				: __( 'Save', 'woocommerce' ) }
+		</Button>
+	);
 }
